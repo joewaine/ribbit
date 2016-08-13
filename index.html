@@ -1,0 +1,734 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; background: #c3ffc3;}
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+
+.score{
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    background: transparent;
+    height: 20px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+form{
+  display: none;
+}
+
+.button,
+.button2,
+.button1,
+.button3,
+.button4{
+height: 100px;
+width:110px;
+color: transparent;
+display: none;
+}
+.button{
+  background:green;
+}
+
+.button1{
+  background:pink;
+}
+
+.button2{
+  background:red;
+}
+
+.button3{
+  background:black;
+}
+.button4{
+  background:blue;
+}
+
+.lit{width:100px;height:100px;border-radius: 50px;color:transparent;}
+
+/*.item-box,
+*/
+
+
+.outcome{
+      width: 100%;
+    position: absolute;
+    top: 0;
+    text-align: center;
+    padding-top: 120px;
+    background: green;
+    height: 100vh;
+}
+
+button{
+    position: absolute;
+    z-index: 100;
+    width: 100%;
+    opacity: .9;
+    height: 100vh;
+    background: green;
+}
+
+
+.score div{
+    float: left;
+    height: 20px;
+    width: 20px;
+
+}
+.score div img{
+    height: 20px;
+    width: 20px;
+
+}
+
+#new-game{
+     height: 30px;
+    color: white;
+    position: absolute;
+    z-index: 1000;
+    text-align: center;
+    padding-top: 6px;
+    bottom: 0;
+    width: 25px;
+    right: 0;
+    margin: 10px;
+    border-radius: 16px;
+}
+
+#new-game img{
+  width: 30px;
+
+}
+
+    </style>
+  </head>
+  <body>
+    <button>
+<img src="http://i.imgur.com/qQdBJ7M.png" alt="">
+    </button>
+
+
+    <div id="new-game"><img src="http://i.imgur.com/Lny9B4K.png" alt=""></div>
+
+<div id="container" style="width:100%;height:100vh;">
+<div class='lit a' data="a"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit b' data="b"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit c' data="c"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit d' data="d"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit e' data="e"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit f' data="f"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit g' data="g"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit h' data="h"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit i' data="i"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit j' data="j"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit k' data="k"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit l' data="l"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit m' data="m"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit n' data="n"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit o' data="o"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit p' data="p"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit q' data="q"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit r' data="r"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit s' data="s"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+<div class='lit t' data="t"><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>
+</div>
+
+
+<div class="item-box button1" data="button1">
+
+alert
+
+</div>
+
+
+<div class="item-box button2" data="button2">
+
+alert
+
+</div>
+
+<div class="item-box button3" data="button3">
+
+alert
+
+</div>
+
+<div class="item-box button4" data="button4">
+
+alert
+
+</div>
+
+<div class="item-box button" data="button0">
+
+alert
+
+</div>
+
+
+
+
+
+<div class="score"></div>
+
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+
+<script>
+
+
+
+$(document).ready(function(){
+
+$('.item-box').each(function(){
+
+var randomspoty = Math.floor(Math.random() * 100) + 1
+
+var randomspotx = Math.floor(Math.random() * 100) + 1
+
+
+$(this).css({'position': 'absolute', 'top': randomspoty + '%', 'left': randomspotx  + '%' });
+
+
+});
+
+
+});
+
+
+
+
+  var socket = io();
+
+
+
+
+function SpriteBaby(first){
+  this.firstName = first;
+  this.hoveFun = function(x){
+    console.log('hello' + first);
+  }
+  this.createSprite = function(x){
+    for(i=0;i<x;i++){
+      $('#container').append('<div class="lit a">U+1F63A<img src="static/img/1.png" alt=""></div>');
+    }
+    animateDiv($('.a'));
+  }
+}
+
+
+
+
+
+
+  $('.button').hover(function(){
+    socket.emit('buttonclick');
+$('.score').append('<div><br> you caught '+ $(this).attr('data') +'</div>' );
+    return false;
+  });
+  socket.on('buttonclick', function(){
+    $('.button').hide();
+  });
+
+  $('.button1').hover(function(){
+    socket.emit('button1click');
+$('.score').append('<div><br> you caught '+ $(this).attr('data') +'</div>' );
+    return false;
+  });
+  socket.on('button1click', function(){
+    $('.button1').hide();
+  });
+
+
+  $('.button2').hover(function(){
+    socket.emit('button2click');
+$('.score').append('<div><br> you caught '+ $(this).attr('data') +'</div>' );
+    return false;
+  });
+  socket.on('button2click', function(){
+    $('.button2').hide();
+  });
+
+
+  $('.button3').hover(function(){
+    socket.emit('button3click');
+$('.score').append('<div><br> you caught '+ $(this).attr('data') +'</div>' );
+    return false;
+  });
+  socket.on('button3click', function(){
+    $('.button3').hide();
+  });
+
+  $('.button4').hover(function(){
+    socket.emit('button4click');
+$('.score').append('<div><br> you caught '+ $(this).attr('data') +'</div>' );
+    return false;
+  });
+  socket.on('button4click', function(){
+    $('.button4').hide();
+  });
+
+
+  $('.a').click(function(){
+    socket.emit('a');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('a', function(){
+    $('.a').remove();
+    checkIfEmpty();
+  });
+
+  $('.b').click(function(){
+    socket.emit('b');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('b', function(){
+    $('.b').remove();
+    checkIfEmpty();
+  });
+
+
+  $('.c').click(function(){
+    socket.emit('c');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('c', function(){
+    $('.c').remove();
+    checkIfEmpty();
+  });
+
+
+  $('.d').click(function(){
+    socket.emit('d');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('d', function(){
+    $('.d').remove();
+    checkIfEmpty();
+  });
+
+  $('.e').click(function(){
+    socket.emit('e');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('e', function(){
+    $('.e').remove();
+    checkIfEmpty();
+  });
+
+  $('.f').click(function(){
+    socket.emit('f');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('f', function(){
+    $('.f').remove();
+    checkIfEmpty();
+  });
+
+
+  $('.g').click(function(){
+    socket.emit('g');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('g', function(){
+    $('.g').remove();
+    checkIfEmpty();
+  });
+
+
+
+  $('.h').click(function(){
+    socket.emit('h');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('h', function(){
+    $('.h').remove();
+    checkIfEmpty();
+  });
+
+
+  $('.i').click(function(){
+    socket.emit('i');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('i', function(){
+    $('.i').remove();
+    checkIfEmpty();
+  });
+
+
+  $('.j').click(function(){
+    socket.emit('j');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('j', function(){
+    $('.j').remove();
+    checkIfEmpty();
+  });
+
+  $('.k').click(function(){
+    socket.emit('k');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('k', function(){
+    $('.k').remove();
+    checkIfEmpty();
+  });
+
+    $('.l').click(function(){
+    socket.emit('l');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('l', function(){
+    $('.l').remove();
+    checkIfEmpty();
+  });
+
+
+    $('.m').click(function(){
+    socket.emit('m');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('m', function(){
+    $('.m').remove();
+    checkIfEmpty();
+  });
+
+
+
+    $('.n').click(function(){
+    socket.emit('n');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('n', function(){
+    $('.n').remove();
+    checkIfEmpty();
+  });
+
+
+
+    $('.o').click(function(){
+    socket.emit('o');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('o', function(){
+    $('.o').remove();
+    checkIfEmpty();
+  });
+
+
+      $('.p').click(function(){
+    socket.emit('p');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+    return false;
+  });
+  socket.on('p', function(){
+    $('.p').remove();
+    checkIfEmpty();
+  });
+
+
+$('.q').click(function(){
+socket.emit('q');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+return false;
+});
+socket.on('q', function(){
+$('.q').remove();
+checkIfEmpty();
+});
+
+$('.r').click(function(){
+socket.emit('r');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+return false;
+});
+socket.on('r', function(){
+$('.r').remove();
+checkIfEmpty();
+});
+
+$('.s').click(function(){
+socket.emit('s');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+return false;
+});
+socket.on('s', function(){
+$('.s').remove();
+checkIfEmpty();
+});
+
+
+$('.t').click(function(){
+socket.emit('t');
+$('.score').append('<div><img src="http://i.imgur.com/tsi2CB6.png" alt=""></div>' );
+return false;
+});
+socket.on('t', function(){
+$('.t').remove();
+checkIfEmpty();
+});
+
+
+
+// mousetrails code here
+
+socket.on('t', function(){
+  io.emit('t');
+  });
+
+
+
+// mousetrails code here
+
+$('button').click(function(){
+socket.emit('gamestart');
+
+return false;
+});
+socket.on('gamestart', function(){
+animateDiv($('.a'));
+animateDiv($('.b'));
+animateDiv($('.c'));
+animateDiv($('.d'));
+animateDiv($('.e'));
+animateDiv($('.f'));
+animateDiv($('.g'));
+animateDiv($('.h'));
+animateDiv($('.i'));
+animateDiv($('.j'));
+
+animateDiv($('.k'));
+animateDiv($('.l'));
+animateDiv($('.m'));
+animateDiv($('.n'));
+animateDiv($('.o'));
+animateDiv($('.p'));
+animateDiv($('.q'));
+animateDiv($('.r'));
+animateDiv($('.s'));
+animateDiv($('.t'));
+  $('button').remove();
+
+});
+
+
+
+
+
+
+
+
+
+$('#new-game').click(function() {
+  socket.emit('restarter');
+return false;
+});
+
+socket.on('restarter', function(){
+location.reload();
+});
+
+
+
+var checkIfEmpty = function(){
+
+if ( $('#container').children().length == 0 ) {
+
+
+if ( $('.score').children().length >= 11 ) {
+
+
+$('#container').empty();
+
+
+
+$('body').append('<div class="outcome"><img src="http://i.imgur.com/JltR61G.png"></div>');
+
+
+return false;
+
+}else{
+
+$('#container').empty();
+
+
+$('body').append('<div class="outcome"><img src="http://i.imgur.com/LkCwtaO.png"></div>');
+
+
+
+return false;
+
+}
+
+
+
+
+}
+
+};
+
+
+$('body').on('click', '.outcome', function(){
+
+  socket.emit('restarter');
+  socket.emit('gamestart');
+
+});
+
+
+  $('form').submit(function(){
+    socket.emit('chat message', $('#m').val());
+    $('#m').val('');
+    return false;
+  });
+  socket.on('chat message', function(msg){
+    $('#messages').append($('<li>').text(msg));
+  });
+</script>
+
+
+
+<script>
+
+
+
+$(document).ready(function() {
+
+
+    function change() {
+    var x = Math.floor(Math.random() * 256); // range is 0-255
+    var y = Math.floor(Math.random() * 256);
+    var z = Math.floor(Math.random() * 256);
+    var thergb = "rgb(" + x + "," + y + "," + z + ")";
+    console.log(thergb,document.body.style.background);
+    document.body.style.background=thergb;
+}
+
+
+
+  var amt = 100 * Math.random();
+
+var numb = Math.round(amt);
+
+
+
+
+
+
+ $( "#container div" ).each(function( i ) {
+
+var amt3 = 100 * Math.random();
+var numb3 = Math.round(amt3);
+
+$(this).css({
+
+'position' : 'absolute',
+'z-index' : numb3,
+'top' : numb3 + 'px',
+'left' : numb3 + 'px'
+});
+  });
+
+ $( "img" ).each(function( i ) {
+var amt2 = 100 * Math.random();
+var numb2 = Math.round(amt2);
+// $(this).css({
+//     '-webkit-filter': 'hue-rotate(' + numb2 +'deg)',
+// 'filter': 'hue-rotate(' + numb2 +'deg)',
+// 'transform': 'rotate(' + numb2 +'deg)',
+// 'position' : 'absolute',
+// 'z-index' : numb2,
+// 'filter': 'saturate(40%)',
+// '-webkit-filter':'saturate(40%)',
+// });
+});
+
+
+
+
+
+
+});
+
+function makeNewPosition($container) {
+
+    // Get viewport dimensions (remove the dimension of the div)
+    var h = $container.height() - 50;
+    var w = $container.width() - 50;
+
+    var nh = Math.floor(Math.random() * h);
+    var nw = Math.floor(Math.random() * w);
+
+    return [nh, nw];
+
+}
+
+function animateDiv($target) {
+    var newq = makeNewPosition($target.parent());
+    var oldq = $target.offset();
+    var speed = calcSpeed([oldq.top, oldq.left], newq);
+
+    $target.animate({
+        top: newq[0],
+        left: newq[1]
+    }, speed, function() {
+        animateDiv($target);
+    });
+
+};
+
+function calcSpeed(prev, next) {
+
+    var x = Math.abs(prev[1] - next[1]);
+    var y = Math.abs(prev[0] - next[0]);
+
+    var greatest = x > y ? x : y;
+
+    var speedModifier = .3;
+
+    var speed = Math.ceil(greatest / speedModifier);
+
+    return speed;
+
+}
+
+
+
+
+</script>
+
+
+  </body>
+</html>
