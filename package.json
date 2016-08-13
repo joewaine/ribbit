@@ -5,5 +5,14 @@
   "dependencies": {
     "express": "^4.10.2",
     "socket.io": "^1.4.8"
-  }
+  },
+  "engines": {
+    "node": "4.4.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joewaine/ribbit.git"
+  },
+  "license": "MIT"
+
 }
