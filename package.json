@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "my first socket.io app",
   "dependencies": {
-    "express": "^4.10.2",
+    "express": "^4.17.1",
     "socket.io": "^1.4.8"
   },
   "engines": {
@@ -14,5 +14,4 @@
     "url": "https://github.com/joewaine/ribbit.git"
   },
   "license": "MIT"
-
 }
